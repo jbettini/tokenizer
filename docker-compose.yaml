@@ -1,0 +1,4 @@
+services:
+  tokenizer:
+    build: .
+    volumes: [.:/tokenizer]

@@ -26,15 +26,15 @@ function getUri(): string {
   let rng = getRandomInt(5);
   rng += 1;
   if (rng == 1) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/1.json";
+    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/1.json";
   } else if (rng == 2) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/2.json";
+    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/2.json";
   } else if (rng == 3) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/3.json";
+    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/3.json";
   } else if (rng == 4) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/4.json";
+    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/4.json";
   }else if (rng == 5) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/5.json";
+    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/5.json";
   }
   return ret;
   // https://raw.githubusercontent.com/[username]/[repository]/[branch]/[path_to_file]

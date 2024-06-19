@@ -70,8 +70,8 @@ describe("solana-nft-anchor", async () => {
 	})[0];
 
 	const metadata = {
-		name: "Kobeni",
-		symbol: "kBN",
+		name: "MonkeyArt",
+		symbol: "MKA",
 		uri: getUri(),
 	};
 

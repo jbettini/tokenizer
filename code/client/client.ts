@@ -17,6 +17,27 @@ import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
+function randomIntFromInterval(min, max): number {
+	return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+function getUri(): string {
+	let ret: string;
+	let rng = randomIntFromInterval(1, 5);
+	if (rng == 1){
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/1.json";
+	} else if (rng == 2) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/2.json";
+	} else if (rng == 3) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/3.json";
+	} else if (rng == 4) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/4.json";
+	} else if (rng == 5) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/5.json";
+	}
+	return ret;
+}
+
 describe("solana-nft-anchor", async () => {
 	// Configured the client to use the devnet cluster.
 	const provider = anchor.AnchorProvider.env();
@@ -51,7 +72,7 @@ describe("solana-nft-anchor", async () => {
 	const metadata = {
 		name: "Kobeni",
 		symbol: "kBN",
-		uri: "https://raw.githubusercontent.com/687c/solana-nft-native-client/main/metadata.json",
+		uri: getUri(),
 	};
 
 	it("mints nft!", async () => {

@@ -21,3 +21,7 @@ yarn add @metaplex-foundation/umi \
     @metaplex-foundation/umi-bundle-defaults \
     @metaplex-foundation/umi-web3js-adapters \
     @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 
+
+
+
+docker-compose run --rm tokenizer /bin/bash

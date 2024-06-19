@@ -25,15 +25,15 @@ function getUri(): string {
 	let ret: string;
 	let rng = randomIntFromInterval(1, 5);
 	if (rng == 1){
-		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/1.json";
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json";
 	} else if (rng == 2) {
-		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/2.json";
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/2.json";
 	} else if (rng == 3) {
-		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/3.json";
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/3.json";
 	} else if (rng == 4) {
-		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/4.json";
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/4.json";
 	} else if (rng == 5) {
-		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/5.json";
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/5.json";
 	}
 	return ret;
 }

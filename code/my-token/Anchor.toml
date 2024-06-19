@@ -4,7 +4,7 @@
 resolution = true
 skip-lint = false
 
-[programs.localnet]
+[programs.devnet]
 my_token = "AaDFYp7PaMSPNdtA5B1fNEKvfNLLjAF3hMVUqZVhe1BF"
 
 [registry]
@@ -12,7 +12,17 @@ url = "https://api.apr.dev"
 
 [provider]
 cluster = "devnet"
-wallet = "~/.config/solana/id.json"
+wallet = "/tokenizer/code/wallet/keypair1.json"
+# wallet = "~/.config/solana/id.json"
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+
+# solana program show AaDFYp7PaMSPNdtA5B1fNEKvfNLLjAF3hMVUqZVhe1BF
+# Deploying cluster: https://api.devnet.solana.com
+# Upgrade authority: /tokenizer/code/wallet/keypair1.json
+# Deploying program "my_token"...
+# Program path: /tokenizer/code/my-token/target/deploy/my_token.so...
+# Program Id: AaDFYp7PaMSPNdtA5B1fNEKvfNLLjAF3hMVUqZVhe1BF
+
+# Deploy success

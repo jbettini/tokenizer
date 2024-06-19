@@ -17,30 +17,6 @@ import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
-}
-
-function getUri(): string {
-  let ret: string;
-  let rng = getRandomInt(5);
-  rng += 1;
-  if (rng == 1) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/1.json";
-  } else if (rng == 2) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/2.json";
-  } else if (rng == 3) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/3.json";
-  } else if (rng == 4) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/4.json";
-  }else if (rng == 5) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/5.json";
-  }
-  return ret;
-  // https://raw.githubusercontent.com/[username]/[repository]/[branch]/[path_to_file]
-
-}
-
 describe("solana-nft-anchor", async () => {
 	// Configured the client to use the devnet cluster.
 	const provider = anchor.AnchorProvider.env();
@@ -72,12 +48,10 @@ describe("solana-nft-anchor", async () => {
 		mint: publicKey(mint.publicKey),
 	})[0];
 
-
-
 	const metadata = {
-		name: "MonkeyArt",
-		symbol: "MKA",
-		uri: getUri(),
+		name: "Kobeni",
+		symbol: "kBN",
+		uri: "https://raw.githubusercontent.com/687c/solana-nft-native-client/main/metadata.json",
 	};
 
 	it("mints nft!", async () => {
@@ -106,20 +80,3 @@ describe("solana-nft-anchor", async () => {
 		);
 	});
 });
-
-// import * as anchor from "@coral-xyz/anchor";
-// import { Program } from "@coral-xyz/anchor";
-// import { MyToken } from "../target/types/my_token";
-
-// describe("my-token", () => {
-//   // Configure the client to use the local cluster.
-//   anchor.setProvider(anchor.AnchorProvider.env());
-
-//   const program = anchor.workspace.MyToken as Program<MyToken>;
-
-//   it("Is initialized!", async () => {
-//     // Add your test here.
-//     const tx = await program.methods.initialize().rpc();
-//     console.log("Your transaction signature", tx);
-//   });
-// });

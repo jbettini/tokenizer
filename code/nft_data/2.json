@@ -1,0 +1,19 @@
+{
+    "name": "MonkeyArt",
+    "description": "A digital representation of a monkey enjoying photography.",
+    "image": "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_image/5.png",
+    "attributes": [
+      {
+        "trait_type": "Background",
+        "value": "City"
+      },
+      {
+        "trait_type": "Art Style",
+        "value": "Deco Art"
+      },
+      {
+        "trait_type": "Accessory",
+        "value": "Camera"
+      }
+    ]
+  }

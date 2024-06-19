@@ -6,7 +6,7 @@
 /*   By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/06/16 23:21:39 by jbettini          #+#    #+#             */
-/*   Updated: 2024/06/18 14:42:23 by jbettini         ###   ########.fr       */
+/*   Updated: 2024/06/19 09:47:15 by jbettini         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,19 +58,19 @@ pub struct InitNFT<'info> {
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
 
-    // #[account(
-    //     mut,
-    //     seeds = [
-    //         b"metadata".as_ref(),
-    //         token_metadata_program.key().as_ref(),
-    //         mint.key().as_ref(),
-    //         b"edition".as_ref(),
-    //     ],
-    //     bump,
-    //     seeds::program = token_metadata_program.key()
-    // )]
-    // /// CHECK:
-    // pub master_edition_account: UncheckedAccount<'info>,
+    #[account(
+        mut,
+        seeds = [
+            b"metadata".as_ref(),
+            token_metadata_program.key().as_ref(),
+            mint.key().as_ref(),
+            b"edition".as_ref(),
+        ],
+        bump,
+        seeds::program = token_metadata_program.key()
+    )]
+    /// CHECK:
+    pub master_edition_account: UncheckedAccount<'info>,
     
     #[account(
         mut,
@@ -126,22 +126,22 @@ pub mod solana_nft_anchor {
         };
         create_metadata_accounts_v3(cpi_context, data_v2, false, true, None)?;
 
-        //create master edition account
-        // let cpi_context = CpiContext::new(
-        //     ctx.accounts.token_metadata_program.to_account_info(),
-        //     CreateMasterEditionV3 {
-        //         edition: ctx.accounts.master_edition_account.to_account_info(),
-        //         mint: ctx.accounts.mint.to_account_info(),
-        //         update_authority: ctx.accounts.signer.to_account_info(),
-        //         mint_authority: ctx.accounts.signer.to_account_info(),
-        //         payer: ctx.accounts.signer.to_account_info(),
-        //         metadata: ctx.accounts.metadata_account.to_account_info(),
-        //         token_program: ctx.accounts.token_program.to_account_info(),
-        //         system_program: ctx.accounts.system_program.to_account_info(),
-        //         rent: ctx.accounts.rent.to_account_info(),
-        //     },
-        // );
-        // create_master_edition_v3(cpi_context, None)?;
+        ////create master edition account
+        let cpi_context = CpiContext::new(
+            ctx.accounts.token_metadata_program.to_account_info(),
+            CreateMasterEditionV3 {
+                edition: ctx.accounts.master_edition_account.to_account_info(),
+                mint: ctx.accounts.mint.to_account_info(),
+                update_authority: ctx.accounts.signer.to_account_info(),
+                mint_authority: ctx.accounts.signer.to_account_info(),
+                payer: ctx.accounts.signer.to_account_info(),
+                metadata: ctx.accounts.metadata_account.to_account_info(),
+                token_program: ctx.accounts.token_program.to_account_info(),
+                system_program: ctx.accounts.system_program.to_account_info(),
+                rent: ctx.accounts.rent.to_account_info(),
+            },
+        );
+        create_master_edition_v3(cpi_context, None)?;
 
         Ok(())
     }

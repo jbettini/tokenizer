@@ -17,28 +17,25 @@ import {
 	ASSOCIATED_TOKEN_PROGRAM_ID,
 } from "@solana/spl-token";
 
-function getRandomInt(max) {
-  return Math.floor(Math.random() * max);
+function randomIntFromInterval(min, max): number {
+	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function getUri(): string {
-  let ret: string;
-  let rng = getRandomInt(5);
-  rng += 1;
-  if (rng == 1) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/1.json";
-  } else if (rng == 2) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/2.json";
-  } else if (rng == 3) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/3.json";
-  } else if (rng == 4) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/4.json";
-  }else if (rng == 5) {
-    ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/nft_data/5.json";
-  }
-  return ret;
-  // https://raw.githubusercontent.com/[username]/[repository]/[branch]/[path_to_file]
-
+	let ret: string;
+	let rng = randomIntFromInterval(1, 5);
+	if (rng == 1){
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json";
+	} else if (rng == 2) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/2.json";
+	} else if (rng == 3) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/3.json";
+	} else if (rng == 4) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/4.json";
+	} else if (rng == 5) {
+		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/5.json";
+	}
+	return ret;
 }
 
 describe("solana-nft-anchor", async () => {
@@ -72,11 +69,9 @@ describe("solana-nft-anchor", async () => {
 		mint: publicKey(mint.publicKey),
 	})[0];
 
-
-
 	const metadata = {
-		name: "MonkeyArt",
-		symbol: "MKA",
+		name: "Kobeni",
+		symbol: "kBN",
 		uri: getUri(),
 	};
 
@@ -106,20 +101,3 @@ describe("solana-nft-anchor", async () => {
 		);
 	});
 });
-
-// import * as anchor from "@coral-xyz/anchor";
-// import { Program } from "@coral-xyz/anchor";
-// import { MyToken } from "../target/types/my_token";
-
-// describe("my-token", () => {
-//   // Configure the client to use the local cluster.
-//   anchor.setProvider(anchor.AnchorProvider.env());
-
-//   const program = anchor.workspace.MyToken as Program<MyToken>;
-
-//   it("Is initialized!", async () => {
-//     // Add your test here.
-//     const tx = await program.methods.initialize().rpc();
-//     console.log("Your transaction signature", tx);
-//   });
-// });

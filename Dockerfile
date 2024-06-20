@@ -6,16 +6,13 @@
 #    By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/14 06:36:19 by jbettini          #+#    #+#              #
-#    Updated: 2024/06/19 10:07:41 by jbettini         ###   ########.fr        #
+#    Updated: 2024/06/19 13:02:01 by jbettini         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 FROM ubuntu:latest
 
-WORKDIR /tokenizer
-
-# ENV PATH="/root/.cargo/bin:${PATH}"
-# ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
+WORKDIR /
 
 # Installation et Maj des dependances
 RUN apt-get update && apt-get install -y \
@@ -48,24 +45,25 @@ RUN solana config set --url devnet && \
 # env sets
 ARG NODE_VERSION="v18.18.0"
 ENV PATH="/root/.nvm/versions/node/${NODE_VERSION}/bin:${PATH}"
-ENV NVM_DIR="/root/.nvm"
+
 
 # client dependencies
 RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+ENV NVM_DIR="/root/.nvm"
+
 RUN . $NVM_DIR/nvm.sh && \
         nvm install ${NODE_VERSION} && \
         nvm use ${NODE_VERSION} && \
         nvm alias default node && \
         npm install -g yarn 
         
-RUN yarn add --dev ts-mocha typescript @types/node @types/mocha && \
-        yarn add @metaplex-foundation/umi \
-                @metaplex-foundation/umi-bundle-defaults \
-                @metaplex-foundation/umi-web3js-adapters \
-                @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 \
-                @metaplex-foundation/umi-signer-wallet-adapters \
-                @solana/spl-token
+# RUN yarn add --dev ts-mocha typescript @types/node @types/mocha && \
+#         yarn add @metaplex-foundation/umi \
+#                 @metaplex-foundation/umi-bundle-defaults \
+#                 @metaplex-foundation/umi-web3js-adapters \
+#                 @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 \
+#                 @metaplex-foundation/umi-signer-wallet-adapters \
+#                 @solana/spl-token
 
 
 ENTRYPOINT fish
-

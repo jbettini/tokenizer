@@ -4,7 +4,7 @@ import { SolanaNftAnchor } from "../target/types/solana_nft_anchor";
 import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
 import {
-	findMasterEditionPda,
+	// findMasterEditionPda,
 	findMetadataPda,
 	mplTokenMetadata,
 	MPL_TOKEN_METADATA_PROGRAM_ID,
@@ -65,12 +65,12 @@ describe("solana-nft-anchor", async () => {
 	})[0];
 
 	//derive the master edition pda
-	let masterEditionAccount = findMasterEditionPda(umi, {
-		mint: publicKey(mint.publicKey),
-	})[0];
+	// let masterEditionAccount = findMasterEditionPda(umi, {
+	// 	mint: publicKey(mint.publicKey),
+	// })[0];
 
 	const metadata = {
-		name: "MonkeyArt",
+		name: "MonkeyArt42",
 		symbol: "MKA",
 		uri: getUri(),
 	};
@@ -83,7 +83,7 @@ describe("solana-nft-anchor", async () => {
 				mint: mint.publicKey,
 				associatedTokenAccount,
 				metadataAccount,
-				masterEditionAccount,
+				// masterEditionAccount,
 				tokenProgram: TOKEN_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 				tokenMetadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,

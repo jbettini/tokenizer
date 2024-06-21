@@ -1,17 +1,8 @@
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNftAnchor } from "../target/types/solana_nft_anchor";
-import { walletAdapterIdentity } from "@metaplex-foundation/umi-signer-wallet-adapters";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-import {
-	// findMasterEditionPda,
-	findMetadataPda,
-	mplTokenMetadata,
-	MPL_TOKEN_METADATA_PROGRAM_ID,
-} from "@metaplex-foundation/mpl-token-metadata";
-import { createUmi } from "@metaplex-foundation/umi-bundle-defaults";
-import { publicKey } from "@metaplex-foundation/umi";
-
+import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
 import {
 	TOKEN_PROGRAM_ID,
 	ASSOCIATED_TOKEN_PROGRAM_ID,
@@ -44,13 +35,7 @@ describe("solana-nft-anchor", async () => {
 	anchor.setProvider(provider);
 	const program = anchor.workspace
 		.SolanaNftAnchor as Program<SolanaNftAnchor>;
-
 	const signer = provider.wallet;
-
-	const umi = createUmi("https://api.devnet.solana.com")
-		.use(walletAdapterIdentity(signer))
-		.use(mplTokenMetadata());
-
 	const mint = anchor.web3.Keypair.generate();
 
 	// Derive the associated token address account for the mint
@@ -59,18 +44,8 @@ describe("solana-nft-anchor", async () => {
 		signer.publicKey
 	);
 
-	// derive the metadata account
-	let metadataAccount = findMetadataPda(umi, {
-		mint: publicKey(mint.publicKey),
-	})[0];
-
-	//derive the master edition pda
-	// let masterEditionAccount = findMasterEditionPda(umi, {
-	// 	mint: publicKey(mint.publicKey),
-	// })[0];
-
 	const metadata = {
-		name: "MonkeyArt42",
+		name: "MonkeyArt4200",
 		symbol: "MKA",
 		uri: getUri(),
 	};
@@ -82,8 +57,6 @@ describe("solana-nft-anchor", async () => {
 				signer: provider.publicKey,
 				mint: mint.publicKey,
 				associatedTokenAccount,
-				metadataAccount,
-				// masterEditionAccount,
 				tokenProgram: TOKEN_PROGRAM_ID,
 				associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
 				tokenMetadataProgram: MPL_TOKEN_METADATA_PROGRAM_ID,

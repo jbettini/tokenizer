@@ -10,8 +10,12 @@ use mpl_token_metadata::types::DataV2;
 
 declare_id!("AaDFYp7PaMSPNdtA5B1fNEKvfNLLjAF3hMVUqZVhe1BF");
 
+
+
 #[derive(Accounts)]
 pub struct InitNFT<'info> {
+
+
     #[account(mut, signer)]
     pub signer: Signer<'info>,
     #[account(
@@ -22,6 +26,7 @@ pub struct InitNFT<'info> {
         mint::freeze_authority = signer.key(),
     )]
     pub mint: Account<'info, Mint>,
+
     #[account(
         init_if_needed,
         payer = signer,
@@ -30,12 +35,13 @@ pub struct InitNFT<'info> {
     )]
     pub associated_token_account: Account<'info, TokenAccount>,
 
-    pub token_metadata_program: Program<'info, Metadata>,
     pub token_program: Program<'info, Token>,
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub system_program: Program<'info, System>,
     pub rent: Sysvar<'info, Rent>,
     
+    pub token_metadata_program: Program<'info, Metadata>,
+
     #[account(
         mut,
         seeds = [
@@ -50,6 +56,29 @@ pub struct InitNFT<'info> {
     pub metadata_account: UncheckedAccount<'info>,
 
 }
+
+// #[account]
+// pub struct Multisig {
+//     pub owners: Vec<Pubkey>,
+//     pub threshold: u64,
+//     pub nonce: u8,
+//     pub owner_set_seqno: u32,
+// }
+
+// impl Multisig {
+//     pub fn new(ctx: Context<InitNFT>, signers: Vec<Pubkey>, threshold: u8) -> ProgramResult {
+//         if signers.is_empty() || threshold == 0 || threshold > signers.len() as u8 {
+//             return Err(ProgramError::InvalidArgument);
+//         }        
+//         let multisig: &mut Account<Multisig> = &mut ctx.accounts.multisig;
+//         multisig.signers = signers;
+//         multisig.threshold = threshold;
+//         multisig.nonce = 0;
+//         multisig.owner_set_seqno = 0;
+//         Ok(())
+//     }
+// }
+
 
 #[program]
 pub mod solana_nft_anchor {

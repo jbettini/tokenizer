@@ -6,7 +6,7 @@
 #    By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/06/14 06:36:19 by jbettini          #+#    #+#              #
-#    Updated: 2024/06/19 13:02:01 by jbettini         ###   ########.fr        #
+#    Updated: 2024/06/20 12:36:32 by jbettini         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -64,6 +64,8 @@ RUN . $NVM_DIR/nvm.sh && \
 #                 @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 \
 #                 @metaplex-foundation/umi-signer-wallet-adapters \
 #                 @solana/spl-token
+
+# yarn add --dev ts-mocha typescript @types/node @types/mocha && yarn add @metaplex-foundation/umi @metaplex-foundation/umi-bundle-defaults @metaplex-foundation/umi-web3js-adapters @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 @metaplex-foundation/umi-signer-wallet-adapters @solana/spl-token
 
 
 ENTRYPOINT fish

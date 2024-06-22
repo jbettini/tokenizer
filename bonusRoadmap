@@ -1,30 +1,59 @@
-Pour implémenter le multisignature (multisig) sur votre smart contract dans l'écosystème Solana, vous devrez suivre quelques principes de base pour garantir que les transactions nécessitent plusieurs signatures avant d'être exécutées. Voici une approche générale que vous pouvez envisager :
+    it("should fail to mint NFT without sufficient signatures", async () => {
+        // Créez l'adresse du compte multisig
+        const [multisigAccount, _] = PublicKey.findProgramAddressSync(
+            [
+                Buffer.from("Sigs-Account"),
+                multisigKeys[0].publicKey.toBuffer(),
+            ],
+            program.programId,
+        );
 
-1. Définir une Structure Multisig
-Tout d'abord, vous devrez définir une structure pour votre contrat multisig. Cette structure peut inclure :
+        try {
+            // Essayez de créer un multisig avec des signataires insuffisants
+            await program.rpc.newMultisig([], {
+                accounts: {
+                    multisigAccount: multisigAccount,
+                    user: payer.publicKey,
+                },
+                signers: [payer]
+            });
+            throw new Error("This should fail but didn't.");
+        } catch (error) {
+            console.log("Failed as expected with insufficient signers:", error);
+        }
+    });
 
-Les clés publiques des signataires : Un ensemble de clés publiques qui sont autorisées à signer les transactions.
-Le seuil de signature : Le nombre minimal de signatures nécessaires pour qu'une transaction soit valide.
-L'état du contrat : Des informations sur les transactions en attente, y compris si elles ont été signées et par qui.
+    it("should fail to mint NFT with an unauthorized signature", async () => {
+        // Supposons que `multisigKeys[2]` n'est pas autorisé
+        try {
+            // Essayez d'effectuer une action avec une clé non autorisée
+            await program.rpc.someMintFunction({
+                accounts: {
+                    multisigAccount: multisigAccount,
+                    user: multisigKeys[2].publicKey,
+                },
+                signers: [multisigKeys[2]]
+            });
+            throw new Error("This should fail but didn't.");
+        } catch (error) {
+            console.log("Failed as expected with unauthorized signature:", error);
+        }
+    });
 
-
-2. Créer des Transactions en Attente
-Plutôt que d'exécuter immédiatement les actions (comme le transfert de tokens ou la modification de paramètres), votre smart contract devrait créer des "transactions en attente". Ces transactions sont des propositions qui doivent être approuvées par les signataires autorisés avant d'être exécutées.
-
-3. Processus de Signature
-Chaque signataire utilise son propre wallet pour signer une transaction en attente. Le smart contract doit garder une trace de quelles clés ont déjà signé la transaction et combien de signatures ont été recueillies.
-
-4. Validation des Signatures
-Une fois que le nombre requis de signatures est atteint (comme spécifié dans le seuil de signature), la transaction peut être exécutée. Le contrat vérifie si le nombre de signatures valides satisfait le seuil requis avant d'effectuer l'opération.
-
-5. Exécution de la Transaction
-Après validation, la transaction en attente est exécutée. Ceci pourrait impliquer des opérations comme le transfert de tokens, la mise à jour de configurations, ou toute autre logique métier spécifique à votre application.
-
-6. Gestion des Erreurs et de la Sécurité
-Il est crucial d'implémenter une gestion robuste des erreurs et des contrôles de sécurité pour prévenir les abus, comme la révocation de signataires ou la modification du seuil sans consensus approprié.
-
-Considérations Supplémentaires
-Interface Utilisateur : Si vous construisez une interface utilisateur pour interagir avec le smart contract, elle devrait permettre aux utilisateurs de voir clairement les transactions en attente, qui a signé, et combien de signatures sont encore nécessaires.
-Audits de Sécurité : Comme les contrats multisig manipulent souvent des actions critiques et de valeur, assurez-vous qu'ils sont rigoureusement audités par des experts en sécurité pour éviter les vulnérabilités.
-Flexibilité : Considérez la possibilité de permettre des modifications dans la configuration du multisig, comme changer les clés de signataires ou les seuils, tout en garantissant que ces modifications exigent elles-mêmes un consensus multisig.
-En suivant ces principes, vous pouvez construire un système robuste de multisignature pour votre smart contract sur Solana, renforçant la sécurité et la flexibilité de vos opérations de contrat intelligent.
+    it("should fail on multiple attempts with the same signature", async () => {
+        // Assurez-vous que la même clé ne peut pas signer plusieurs fois
+        try {
+            // Répétez la signature pour tester
+            await program.rpc.someMintFunction({
+                accounts: {
+                    multisigAccount: multisigAccount,
+                    user: multisigKeys[0].publicKey,
+                },
+                signers: [multisigKeys[0], multisigKeys[0]] // Signature répétée
+            });
+            throw new Error("This should fail but didn't.");
+        } catch (error) {
+            console.log("Failed as expected with repeated signatures:", error);
+        }
+    });
+});

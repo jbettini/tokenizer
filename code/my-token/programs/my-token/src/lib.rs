@@ -34,7 +34,8 @@ pub struct MultisigAccount {
 pub struct CreateMultisig<'info> {
     #[account(mut)]
     pub buyer: Signer<'info>,
-        // Mint Account
+
+    // Mint Account
     #[account(
         init,
         payer = buyer,

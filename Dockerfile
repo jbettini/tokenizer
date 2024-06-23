@@ -1,15 +1,3 @@
-# **************************************************************************** #
-#                                                                              #
-#                                                         :::      ::::::::    #
-#    Dockerfile                                         :+:      :+:    :+:    #
-#                                                     +:+ +:+         +:+      #
-#    By: jbettini <jbettini@student.42.fr>          +#+  +:+       +#+         #
-#                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2024/06/14 06:36:19 by jbettini          #+#    #+#              #
-#    Updated: 2024/06/23 17:39:24 by jbettini         ###   ########.fr        #
-#                                                                              #
-# **************************************************************************** #
-
 FROM ubuntu:latest
 
 WORKDIR /
@@ -30,13 +18,13 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # Installer Solana CLI
 RUN sh -c "$(curl -sSfL https://release.solana.com/stable/install)"
 ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH" 
-RUN solana-install update
-RUN solana-install init 1.18.16
+RUN solana-install update && \
+        solana-install init 1.18.16
 
 # Avm et Anchor
-RUN cargo install --git https://github.com/coral-xyz/anchor avm --locked --force
-RUN avm install latest && \
-        avm use latest
+RUN cargo install --git https://github.com/coral-xyz/anchor avm --force && \
+        avm install 0.30.0 && \
+        avm use 0.30.0
 
 # solana configs
 RUN solana config set --url devnet && \
@@ -58,11 +46,7 @@ RUN . $NVM_DIR/nvm.sh && \
         npm install -g yarn 
         
 # RUN yarn add --dev ts-mocha typescript @types/node @types/mocha && \
-#         yarn add @metaplex-foundation/umi \
-#                 @metaplex-foundation/umi-bundle-defaults \
-#                 @metaplex-foundation/umi-web3js-adapters \
-#                 @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 \
-#                 @metaplex-foundation/umi-signer-wallet-adapters \
-#                 @solana/spl-token
+#         yarn add @solana/spl-token && \
+#         yarn install
 
 ENTRYPOINT fish

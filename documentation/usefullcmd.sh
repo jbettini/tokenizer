@@ -1,5 +1,3 @@
-
-
 # solana config get/
 
 docker-compose run --rm tokenizer /bin/bash

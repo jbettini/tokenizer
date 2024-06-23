@@ -10,4 +10,4 @@ solana program show [PROGRAM ID]
 solana program extend [PROGRAM ID] 100000
 
 yarn install
-yarn add --dev ts-mocha typescript @types/node @types/mocha && yarn add @metaplex-foundation/umi @metaplex-foundation/umi-bundle-defaults  @metaplex-foundation/umi-web3js-adapters @metaplex-foundation/mpl-token-metadata@v3.0.0-alpha.24 @metaplex-foundation/umi-signer-wallet-adapters @solana/spl-token
+yarn add --dev ts-mocha typescript @types/node @types/mocha && yarn add @solana/spl-token @metaplex-foundation/umi@^0.8.2 @solana/web3.js@^1.91.6 fastestsmallesttextencoderdecoder@^1.0.22

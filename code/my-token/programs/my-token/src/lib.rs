@@ -19,24 +19,22 @@ pub enum ErrorCode {
     UnauthorizedApprover,
     #[msg("Execution Not Autorized: Not enought approver.")]
     UnauthorizedExecution,
+    #[msg("Approver already approved")]
+    AlreadyApproved
 }
 
 #[account]
 pub struct MultisigAccount {
     pub signers: Vec<Pubkey>,
     pub threshold: u64,
+    pub mint: Pubkey,
 }
 
 #[derive(Accounts)]
 pub struct CreateMultisig<'info> {
-    #[account(mut, signer)]
+    #[account(mut)]
     pub buyer: Signer<'info>,
-    #[account(
-        init, 
-        payer = buyer,
-        space = 1024 * 8
-    )]
-    pub multisig_account: Account<'info, MultisigAccount>,
+        // Mint Account
     #[account(
         init,
         payer = buyer,
@@ -44,8 +42,25 @@ pub struct CreateMultisig<'info> {
         mint::authority = multisig_account.key(),
     )]
     pub mint: Account<'info, Mint>,
+    
+
+    // Multisig Account
+    #[account(
+        init, 
+        payer = buyer,
+        space = 1024 * 8,
+        seeds = [
+			b"multisig",
+			mint.key().as_ref(),
+		],
+		bump
+    )]
+    pub multisig_account: Account<'info, MultisigAccount>,
+
+    pub token_program: Program<'info, Token>,
     pub system_program: Program<'info, System>,
 }
+
 
 #[account]
 pub struct Transaction {
@@ -75,43 +90,37 @@ pub struct CreateTransaction<'info> {
 }
 
 #[derive(Accounts)]
-pub struct ApproveTransaction<'info> {
-    #[account(mut, 
-        seeds = [
-            b"create-transaction",
-            buyer.key().as_ref(),
-        ],
-        bump
-    )]
-    pub transaction: Account<'info, Transaction>,
-    #[account(signer)]
-    pub approver: Signer<'info>,
-    #[account()]
-    pub buyer: Signer<'info>,
-}
-
-#[derive(Accounts)]
 pub struct ExecuteTransaction<'info> {
 
     #[account(mut, signer)]
 	pub buyer: Signer<'info>,
 
-
-    #[account(mut)]
+    #[account(mut, 
+        seeds = [
+            b"create-transaction",
+            buyer.key().as_ref(),
+            multisig_account.key().as_ref(),
+        ],
+        bump
+    )]
     pub transaction: Account<'info, Transaction>,
 
 
     // Signers 
-    #[account(zero, signer)]
+    #[account(
+        mut,
+        seeds = [
+			b"multisig",
+			mint.key().as_ref(),
+		],
+		bump
+    )]
     multisig_account: Account<'info, MultisigAccount>,
 
     // Minting Account
-    #[account(
-        init,
-        payer = buyer,
-        mint::decimals = 0,
-        mint::authority = multisig_account.key(),
-    )]
+    #[account(mut,
+        mint::authority = multisig_account,
+)]
     pub mint: Account<'info, Mint>,
 
     // Token Holder
@@ -146,48 +155,73 @@ pub struct ExecuteTransaction<'info> {
     pub metadata_account: UncheckedAccount<'info>,
 }
 
+#[derive(Accounts)]
+pub struct ApproveTransaction<'info> {
+    pub multisig_account: Account<'info, MultisigAccount>,
+    #[account(mut, 
+        seeds = [
+            b"create-transaction",
+            buyer.key().as_ref(),
+            multisig_account.key().as_ref(),
+        ],
+        bump
+    )]
+    pub transaction: Account<'info, Transaction>,
+    #[account(signer)]
+    pub approver: Signer<'info>,
+    #[account()]
+    pub buyer: Signer<'info>,
+}
+
 #[program]
 pub mod solana_nft_anchor {
     use super::*;
 
+    pub fn approve_transaction(ctx: Context<ApproveTransaction>) -> Result<()> {
+        let transaction = &mut ctx.accounts.transaction;
+        if !transaction.signers.contains(&ctx.accounts.approver.key()) {
+            return Err(ErrorCode::UnauthorizedApprover.into());
+        }
+        if transaction.approver.contains(&ctx.accounts.approver.key()) {
+            return Err(ErrorCode::AlreadyApproved.into());
+        }
+        transaction.approver.push(*ctx.accounts.approver.key);
+        if transaction.approver.len() as u64 >= 3 {
+            transaction.exec = true;
+        }
+        Ok(())
+    }
     pub fn new_multisig(
         ctx: Context<CreateMultisig>, 
-        signers: Vec<Pubkey>
+        s: Vec<Pubkey>,
+        mint: Pubkey
         ) -> Result<()> {
-            // Rendre les signer unique
-            if signers.is_empty() && signers.len() < 3 {
+            let mut uniq = std::collections::HashSet::new();
+            let signers = s
+                .into_iter()
+                .filter(|signer| uniq.insert(*signer))  
+                .collect::<Vec<Pubkey>>();
+            if signers.is_empty() || signers.len() < 3 {
                 return Err(ErrorCode::InvalidArgs.into());
             }
             let multisig: &mut Account<MultisigAccount> = &mut ctx.accounts.multisig_account;
             multisig.signers = signers;
             multisig.threshold = 3;
+            multisig.mint = mint;
             Ok(())
     }
 
     pub fn new_transaction(
         ctx: Context<CreateTransaction>, 
         buyer: Pubkey, 
-        signers: Vec<Pubkey>
+        // signers: Vec<Pubkey>
         ) -> Result<()> {
             let transaction = &mut ctx.accounts.transaction;
             transaction.buyer = buyer;
-            transaction.signers = signers;
+            transaction.signers = ctx.accounts.multisig_account.signers.clone();
             transaction.approver = Vec::new();
             transaction.exec = false;
             Ok(())
-    }
-
-    pub fn approve_transaction(ctx: Context<ApproveTransaction>) -> Result<()> {
-        let transaction = &mut ctx.accounts.transaction;
-        if transaction.signers.contains(&ctx.accounts.approver.key) && !transaction.approver.contains(&ctx.accounts.approver.key) {
-            transaction.approver.push(*ctx.accounts.approver.key);
-            if transaction.approver.len() >= 3  {
-                transaction.exec = true;
-            }
-            Ok(())
-        } else {
-            return Err(ErrorCode::UnauthorizedApprover.into())
-        }
     }
 
     pub fn execute(
@@ -200,17 +234,30 @@ pub mod solana_nft_anchor {
             if !transaction.exec {
                 return Err(ErrorCode::UnauthorizedExecution.into());
             }
-            let cpi_context = CpiContext::new(
+            mint_to(CpiContext::new_with_signer(
                 ctx.accounts.token_program.to_account_info(),
                 MintTo {
                     mint: ctx.accounts.mint.to_account_info(),
                     to: ctx.accounts.associated_token_account.to_account_info(),
                     authority: ctx.accounts.multisig_account.to_account_info(),
                 },
-            );
-            mint_to(cpi_context, 1)?;
+                &[&[
+                    b"multisig",
+                    ctx.accounts.mint.key().as_ref(),
+                    &[ctx.bumps.multisig_account]
+                ]]    
+            ), 1)?;
             // Add Metadata
-            let cpi_context = CpiContext::new(
+            let data_v2 = DataV2 {
+                name,
+                symbol,
+                uri,
+                seller_fee_basis_points: 0,
+                creators: None,
+                collection: None,
+                uses: None,
+            };
+            create_metadata_accounts_v3(CpiContext::new_with_signer(
                 ctx.accounts.token_metadata_program.to_account_info(),
                 CreateMetadataAccountsV3 {
                     metadata: ctx.accounts.metadata_account.to_account_info(),
@@ -221,17 +268,12 @@ pub mod solana_nft_anchor {
                     system_program: ctx.accounts.system_program.to_account_info(),
                     rent: ctx.accounts.rent.to_account_info(),
                 },
-            );
-            let data_v2 = DataV2 {
-                name,
-                symbol,
-                uri,
-                seller_fee_basis_points: 0,
-                creators: None,
-                collection: None,
-                uses: None,
-            };
-            create_metadata_accounts_v3(cpi_context, data_v2, false, true, None)?;
+                &[&[
+                    b"multisig",
+                    ctx.accounts.mint.key().as_ref(),
+                    &[ctx.bumps.multisig_account]
+                ]]    
+            ), data_v2, false, true, None)?;
             Ok(())
     }
 }

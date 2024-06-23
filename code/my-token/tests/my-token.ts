@@ -39,89 +39,89 @@ describe("solana-nft-anchor", async () => {
 	anchor.setProvider(provider);
 	const program = anchor.workspace.SolanaNftAnchor as Program<SolanaNftAnchor>;
 	const buyer = provider.wallet as anchor.Wallet;
+	const mint = anchor.web3.Keypair.generate();
 
-	// test si exec sans signature - Avec une signature qui a pas le droit - plusieur fois avec la meme signature
 	it("mints nft!", async () => {
 		const multisigKeys = new Array(3).fill(null).map(() => anchor.web3.Keypair.generate());
 		const signerPubkeys = multisigKeys.map(key => key.publicKey);
+		// const signerPubkeys = Array(3).fill(multisigKeys[0].publicKey); // error duplicate keys
 
 		// create multisig
-		const multisigAccount =  anchor.web3.Keypair.generate();
-		tx('Create Mulsig Account', await program.methods
-			.newMultisig(signerPubkeys)
-			.accounts({
-				buyer: buyer.publicKey,
-				multisigAccount: multisigAccount.publicKey,
-			})
-			.signers([multisigAccount])
-			.rpc());
-
-		// // // propose transac
-		const [transaction] = anchor.web3.PublicKey.findProgramAddressSync(
+		const [multisigAccount] = anchor.web3.PublicKey.findProgramAddressSync(
 			[
-				Buffer.from("Transaction-Account"),
-				buyer.publicKey.toBuffer(),
-				multisigAccount.publicKey.toBuffer(),
+				Buffer.from("multisig"),
+				mint.publicKey.toBuffer(),
 			],
 			program.programId,
 		);
+		tx('Create Mulsig Account', await program.methods
+			.newMultisig(
+				signerPubkeys,
+				mint.publicKey,
+			)
+			.accounts({
+				buyer: buyer.publicKey,
+				mint: mint.publicKey,
+			})
+			.signers([mint])
+			.rpc());
 		
 		tx('Create Transaction', await program.methods
 			.newTransaction(
 				buyer.publicKey,
-				signerPubkeys,
 			)
 			.accounts({
 				buyer: buyer.publicKey,
-				multisigAccount: multisigAccount.publicKey,
+				multisigAccount,
 			})
 			.signers([buyer.payer])
 			.rpc());
 
-		// // approve transaction
 
-		const approveTransaction = async (approver: anchor.web3.Keypair) =>{
+		const approveTransaction = async (approver: anchor.web3.Keypair) => {
 			tx(`Approve Transaction`, await program.methods
 				.approveTransaction()
 				.accounts({
 					approver: approver.publicKey,
 					buyer: buyer.publicKey,
-					multisigAccount: multisigAccount.publicKey,
+					multisigAccount,
 				})
 				.signers([approver])
 				.rpc());
 		};
 		
 		const metadata = {
-			name: "MonkeyArt4242",
+			name: "MonkeyArt42MAYO",
 			symbol: "MKA",
 			uri: getUri(),
 		};
-
-		const mint = anchor.web3.Keypair.generate();
 		const associatedTokenAccount = await getAssociatedTokenAddress(
 			mint.publicKey,
 			buyer.publicKey
 		);
-
 		const executeTransaction = async () => {
 			tx(`Execute Transaction`, await program.methods
 				.execute(metadata.name, metadata.symbol, metadata.uri)
 				.accounts({
 					buyer: buyer.publicKey,
-					transaction: transaction,
-					multisigAccount: multisigAccount.publicKey,
-					associatedTokenAccount: associatedTokenAccount,
+					mint: mint.publicKey,
+					multisigAccount,
+					associatedTokenAccount,
 				})
 				.signers([buyer.payer])
 				.rpc());
 		};
 
-		// Accept the transaction
+		// await approveTransaction(anchor.web3.Keypair.generate());
+		// for (const owner of multisigKeys.slice(1)) {
+		// 	await approveTransaction(owner);
+		// }
+		// await executeTransaction();
+		// await approveTransaction(multisigKeys[0]);
+
 		for (const owner of multisigKeys.slice(0)) {
 			await approveTransaction(owner);
 		}
-
 		await executeTransaction();
 	});
 });

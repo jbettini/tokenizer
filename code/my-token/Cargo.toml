@@ -1,8 +1,14 @@
 [workspace]
 members = [
-    "programs/*"
+	"programs/*"
 ]
 resolver = "2"
+
+# [patch.crates-io]
+# solana-program = { version = "1.18.17" }
+# solana-sdk = { version = "1.18.17" }
+# solana-zk-token-sdk = { git = "https://github.com/solana-labs/solana-zk-token-sdk.git", rev = "a_specific_commit_hash" }
+
 
 [profile.release]
 overflow-checks = true

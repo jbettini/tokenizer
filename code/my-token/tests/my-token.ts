@@ -2,22 +2,17 @@ import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
 import { SolanaNftAnchor } from "../target/types/solana_nft_anchor";
 import { getAssociatedTokenAddress } from "@solana/spl-token";
-// import { MPL_TOKEN_METADATA_PROGRAM_ID } from "@metaplex-foundation/mpl-token-metadata";
-// import {
-// 	TOKEN_PROGRAM_ID,
-// 	ASSOCIATED_TOKEN_PROGRAM_ID,
-// } from "@solana/spl-token";
 
 const tx = (name: string, tx: string) => {
 	console.log(`${name}: https://explorer.solana.com/tx/${tx}?cluster=devnet\n`);
 }
 
-function randomIntFromInterval(min, max): number {
+function randomIntFromInterval(min: number, max: number): number {
 	return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
 function getUri(): string {
-	let ret: string;
+	let ret: string = "";
 	let rng = randomIntFromInterval(1, 5);
 	if (rng == 1){
 		ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json";
@@ -33,7 +28,7 @@ function getUri(): string {
 	return ret;
 }
 
-describe("solana-nft-anchor", async () => {
+describe("solana-nft-anchor", () => {
 	// Configured the client to use the devnet cluster.
 	const provider = anchor.AnchorProvider.env();
 	anchor.setProvider(provider);
@@ -101,7 +96,7 @@ describe("solana-nft-anchor", async () => {
 		};
 		
 		const metadata = {
-			name: "MonkeyArt42",
+			name: "MonkeyArt42TOTOTO",
 			symbol: "MKA",
 			uri: getUri(),
 		};
@@ -115,7 +110,7 @@ describe("solana-nft-anchor", async () => {
 				.accounts({
 					buyer: buyer.publicKey,
 					mint: mint.publicKey,
-					multisigAccount,
+					// multisigAccount,
 					associatedTokenAccount,
 				})
 				.signers([buyer.payer])

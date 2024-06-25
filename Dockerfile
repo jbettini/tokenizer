@@ -49,6 +49,6 @@ RUN . $NVM_DIR/nvm.sh && \
 #         yarn add @solana/spl-token && \
 #         yarn install
 
-WORKDIR /tokenizer/code/.
+WORKDIR /tokenizer/.
 
 ENTRYPOINT fish

@@ -17,7 +17,7 @@ Tokenizer est un projet ou l'on doit cree un token sur une blockchain au choix. 
 - Minting de NFT avec métadonnées dynamiques.
 - Sécurisation des opérations via des contrats intelligents.
 
-Dependance :
+## Dependance :
     - Curl
     - Rust, Cargo
     - Solana CLI

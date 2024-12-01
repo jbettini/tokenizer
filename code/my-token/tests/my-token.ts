@@ -7,28 +7,6 @@ const tx = (name: string, tx: string) => {
 	console.log(`${name}: https://explorer.solana.com/tx/${tx}?cluster=devnet\n`);
 }
 
-function randomIntFromInterval(min: number, max: number): number {
-	return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-function getUri(): string {
-	let ret: string = "";
-	// let rng = randomIntFromInterval(1, 5);
-	// if (rng == 1){
-	// 	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json";
-	// } else if (rng == 2) {
-	// 	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/2.json";
-	// } else if (rng == 3) {
-	// 	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/3.json";
-	// } else if (rng == 4) {
-	// 	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/4.json";
-	// } else if (rng == 5) {
-	// 	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/5.json";
-	// }
-	ret = "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json";
-	return ret;
-}
-
 describe("solana-nft-anchor", () => {
 	// Configured the client to use the devnet cluster.
 	const provider = anchor.AnchorProvider.env();
@@ -40,7 +18,6 @@ describe("solana-nft-anchor", () => {
 	it("mints nft!", async () => {
 		const multisigKeys = new Array(3).fill(null).map(() => anchor.web3.Keypair.generate());
 		const signerPubkeys = multisigKeys.map(key => key.publicKey);
-		// const signerPubkeys = Array(3).fill(multisigKeys[0].publicKey); // error duplicate keys
 
 		// create multisig
 		const [multisigAccount] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -72,16 +49,6 @@ describe("solana-nft-anchor", () => {
 			})
 			.signers([buyer.payer])
 			.rpc());
-		// tx('Create Transaction', await program.methods
-		// 	.newTransaction(
-		// 		buyer.publicKey,
-		// 	)
-		// 	.accounts({
-		// 		buyer: buyer.publicKey,
-		// 		multisigAccount,
-		// 	})
-		// 	.signers([buyer.payer])
-		// 	.rpc());
 
 
 		const approveTransaction = async (approver: anchor.web3.Keypair) => {
@@ -97,9 +64,9 @@ describe("solana-nft-anchor", () => {
 		};
 		
 		const metadata = {
-			name: "MonkeyArt42TOTOTO",
+			name: "MonkeyJbettini42",
 			symbol: "MKA",
-			uri: getUri(),
+			uri: "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json",
 		};
 		const associatedTokenAccount = await getAssociatedTokenAddress(
 			mint.publicKey,
@@ -118,17 +85,9 @@ describe("solana-nft-anchor", () => {
 				.rpc());
 		};
 
-		// await approveTransaction(anchor.web3.Keypair.generate());
-		// for (const owner of multisigKeys.slice(1)) {
-		// 	await approveTransaction(owner);
-		// }
-		// await executeTransaction();
-		// await approveTransaction(multisigKeys[0]);
-
 		for (const owner of multisigKeys.slice(0)) {
 			await approveTransaction(owner);
 		}
 		await executeTransaction();
-		// await executeTransaction();
 	});
 });

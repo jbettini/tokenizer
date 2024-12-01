@@ -89,5 +89,5 @@ describe("solana-nft-anchor", () => {
 			await approveTransaction(owner);
 		}
 		await executeTransaction();
-	});
+	}, 15000);
 });

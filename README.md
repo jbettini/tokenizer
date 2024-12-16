@@ -6,7 +6,7 @@
 - *Development Framework*: Anchor
 - *Node Version Manager*: nvm
 - *Package Manager*: yarn
-- *Scripting and Testing*: TypeScript, ts-mocha
+- *Scripting and Testing*: TypeScript, ts-mocha, jest
 
 ## Overview
 Tokenizer est un projet ou l'on doit cree un token sur une blockchain au choix. J'ai choisi solana car elle utilise comme langage de programation Rust, et parceque elle est l'une des blochain avec les transaction le plus rapide ce qui facilite les test. J'ai choisi d'implementer une logique de multisignature pour le minting du token ce qui permet d'ajouter une securite dans le projet.
@@ -23,5 +23,3 @@ Tokenizer est un projet ou l'on doit cree un token sur une blockchain au choix. 
     - Solana CLI
     - Avm, Anchor
     - nvm, yarn, librairie ts
-
-

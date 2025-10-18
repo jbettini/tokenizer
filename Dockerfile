@@ -1,56 +1,42 @@
-FROM ubuntu:latest
+# Image de base Rust officielle (version 1.79.0 pour compatibilité avec proc-macro2)
+FROM rust:1.79.0-bookworm
 
-WORKDIR /
-
-ARG SOLANA_VERSION=1.18.16
-
-# Installation et Maj des dependances
+# Installer les dépendances système
 RUN apt-get update && apt-get install -y \
-        build-essential \
-        curl \
-        git \
-        libssl-dev \
-        pkg-config \
-        fish
+    build-essential \
+    pkg-config \
+    libssl-dev \
+    libudev-dev \
+    curl \
+    git \
+    fish \
+    ca-certificates \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# Installer Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-ENV PATH="/root/.cargo/bin:${PATH}"
+# Installer Solana CLI v1.18.16 avec binaires précompilés
+RUN wget -O solana-release.tar.bz2 https://github.com/solana-labs/solana/releases/download/v1.18.16/solana-release-x86_64-unknown-linux-gnu.tar.bz2 \
+    && tar jxf solana-release.tar.bz2 \
+    && cp -r solana-release/bin/* /usr/local/bin/ \
+    && rm -rf solana-release solana-release.tar.bz2 \
+    && solana --version
 
-# Installer Solana CLI
-RUN sh -c "$(curl -sSfL https://release.solana.com/v${SOLANA_VERSION}/install)"
-ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+# Installer Anchor CLI v0.30.0
+RUN cargo install --git https://github.com/coral-xyz/anchor --tag v0.30.0 anchor-cli --locked \
+    && anchor --version
 
-RUN solana-install update && solana-install init 1.18.16
+# Installer Node.js 18 et yarn
+RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g yarn \
+    && rm -rf /var/lib/apt/lists/* \
+    && node --version && npm --version && yarn --version
 
-# Avm et Anchor
-RUN cargo install --git https://github.com/coral-xyz/anchor avm --force && \
-        avm install 0.30.0 && \
-        avm use 0.30.0
+# Configurer Solana pour devnet
+RUN mkdir -p /root/.config/solana \
+    && solana config set --url devnet
 
-# solana configs
-RUN solana config set --url devnet && \
-        solana config set --keypair /tokenizer/code/wallet/keypair1.json
-        
-# env sets
-ARG NODE_VERSION="v18.18.0"
-ENV PATH="/root/.nvm/versions/node/${NODE_VERSION}/bin:${PATH}"
+WORKDIR /workspace
 
-
-# client dependencies
-RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-ENV NVM_DIR="/root/.nvm"
-
-RUN . $NVM_DIR/nvm.sh && \
-        nvm install ${NODE_VERSION} && \
-        nvm use ${NODE_VERSION} && \
-        nvm alias default node && \
-        npm install -g yarn 
-        
-# RUN yarn add --dev ts-mocha typescript @types/node @types/mocha && \
-#         yarn add @solana/spl-token && \
-#         yarn install
-
-WORKDIR /tokenizer/.
-
-ENTRYPOINT fish
+# Point d'entrée avec fish shell
+CMD ["fish"]

@@ -1,4 +1,9 @@
 services:
   tokenizer:
     build: .
-    volumes: [.:/tokenizer]
+    volumes: 
+      - .:/workspace
+    working_dir: /workspace
+    environment:
+      - ANCHOR_WALLET=/workspace/code/wallet/keypair1.json
+      - ANCHOR_PROVIDER_URL=https://api.devnet.solana.com

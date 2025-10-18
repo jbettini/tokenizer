@@ -1,4 +1,5 @@
-# Image de base Rust officielle (version 1.79.0 pour compatibilité avec proc-macro2)
+# Image de base Rust 1.79.0 - version stable officielle pour Anchor 0.30.0
+# Cette version est compatible avec proc-macro2, anchor-syn et Solana 1.18.16
 FROM rust:1.79.0-bookworm
 
 # Installer les dépendances système
@@ -36,7 +37,12 @@ RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - \
 RUN mkdir -p /root/.config/solana \
     && solana config set --url devnet
 
+# Copier le script d'entrypoint
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 WORKDIR /workspace
 
-# Point d'entrée avec fish shell
+# Point d'entrée avec configuration automatique
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["fish"]

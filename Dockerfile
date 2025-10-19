@@ -1,56 +1,57 @@
-FROM ubuntu:latest
+# Utiliser Ubuntu 22.04 LTS comme base pour la stabilité
+FROM ubuntu:22.04
 
-WORKDIR /
+# Définir le répertoire de travail
+WORKDIR /app
 
-ARG SOLANA_VERSION=1.18.16
+# Arguments pour les versions
+ARG ANCHOR_VERSION=v0.30.1 # Utiliser le tag Git
+ARG NODE_VERSION=20.x
 
-# Installation et Maj des dependances
+# Empêcher les invites interactives lors de l'installation
+ENV DEBIAN_FRONTEND=noninteractive
+
+# --- 1. Installation des dépendances système ---
 RUN apt-get update && apt-get install -y \
-        build-essential \
-        curl \
-        git \
-        libssl-dev \
-        pkg-config \
-        fish
+    build-essential \
+    curl \
+    git \
+    libssl-dev \
+    pkg-config \
+    fish \
+    ca-certificates \
+    gnupg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Installer Rust
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+# --- 2. Installation de la dernière version stable de Rust ---
+# Ceci est nécessaire pour que les dépendances d'Anchor CLI puissent se compiler.
 ENV PATH="/root/.cargo/bin:${PATH}"
+RUN curl --proto '=https' --tlsv1.2 -sSf --retry 5 --retry-delay 5 https://sh.rustup.rs | sh -s -- -y && \
+    rustc --version
 
-# Installer Solana CLI
-RUN sh -c "$(curl -sSfL https://release.solana.com/v${SOLANA_VERSION}/install)"
-ENV PATH="/root/.local/share/solana/install/active_release/bin:$PATH"
+# --- 3. Installation de Node.js (via NodeSource) et Yarn ---
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL --retry 5 --retry-delay 5 https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_${NODE_VERSION} nodistro main" | tee /etc/apt/sources.list.d/nodesource.list && \
+    apt-get update && apt-get install -y nodejs && \
+    npm install -g yarn
 
-RUN solana-install update && solana-install init 1.18.16
+# --- 4. Installation de Solana CLI via la nouvelle URL ANZA ---
+ENV PATH="/root/.local/share/solana/install/active_release/bin:${PATH}"
+RUN sh -c "$(curl -sSfL --retry 5 --retry-delay 5 https://release.anza.xyz/stable/install)" && \
+    solana --version
 
-# Avm et Anchor
-RUN cargo install --git https://github.com/coral-xyz/anchor avm --force && \
-        avm install 0.30.0 && \
-        avm use 0.30.0
+# --- 5. Installation d'Anchor CLI directement avec Cargo (plus fiable) ---
+RUN cargo install --git https://github.com/coral-xyz/anchor --tag ${ANCHOR_VERSION} anchor-cli && \
+    anchor --version
 
-# solana configs
+# --- 6. Configuration de l'environnement pour Anchor ---
+ENV ANCHOR_AVM_DISABLE=1
 RUN solana config set --url devnet && \
-        solana config set --keypair /tokenizer/code/wallet/keypair1.json
-        
-# env sets
-ARG NODE_VERSION="v18.18.0"
-ENV PATH="/root/.nvm/versions/node/${NODE_VERSION}/bin:${PATH}"
+    solana config get
 
+# Changer le répertoire de travail pour le projet
+WORKDIR /tokenizer
 
-# client dependencies
-RUN curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-ENV NVM_DIR="/root/.nvm"
-
-RUN . $NVM_DIR/nvm.sh && \
-        nvm install ${NODE_VERSION} && \
-        nvm use ${NODE_VERSION} && \
-        nvm alias default node && \
-        npm install -g yarn 
-        
-# RUN yarn add --dev ts-mocha typescript @types/node @types/mocha && \
-#         yarn add @solana/spl-token && \
-#         yarn install
-
-WORKDIR /tokenizer/.
-
-ENTRYPOINT fish
+# Point d'entrée pour avoir un shell interactif dans le conteneur
+ENTRYPOINT ["fish"]

@@ -9,7 +9,7 @@ use anchor_spl::{
 use mpl_token_metadata::types::DataV2;
 use std::convert::Into;
 
-declare_id!("AaDFYp7PaMSPNdtA5B1fNEKvfNLLjAF3hMVUqZVhe1BF");
+declare_id!("CpSi4sN2zeeEZpdfkGf1NjYCrV41oodwpFhazZZee88E");
 
 #[error_code]
 pub enum ErrorCode {

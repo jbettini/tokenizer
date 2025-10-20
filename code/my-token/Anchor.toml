@@ -8,6 +8,9 @@ skip-lint = false
 [programs.devnet]
 my_token = "DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU"
 
+[programs.localnet]
+my_token = "DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU"
+
 [registry]
 url = "https://api.apr.dev"
 

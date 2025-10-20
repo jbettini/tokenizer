@@ -6,14 +6,14 @@ anchor test --skip-build --skip-deploy
 
 solana program show |PROGRAM ID|
 solana program extend |PROGRAM ID| 100000
+solana config set --keypair ../wallet/keypair1.json
 
 yarn add --dev ts-mocha typescript @types/node @types/mocha && yarn add @solana/spl-token @metaplex-foundation/umi@^0.8.2 @solana/web3.js@^1.91.6 fastestsmallesttextencoderdecoder@^1.0.22
 
 docker system prune -a --volumes
 
 cargo add anchor-lang --features=init-if-needed
-cargo add anchor-spl --features=metadata%  
-
+cargo add anchor-spl --features=metadata%
 
 npm install --save-dev jest ts-jest @types/jest typescript
 

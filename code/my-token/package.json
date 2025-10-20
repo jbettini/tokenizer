@@ -11,6 +11,7 @@
     "@metaplex-foundation/umi": "^0.8.2",
     "@solana/spl-token": "^0.4.9",
     "@solana/web3.js": "^1.91.6",
+    "debug": "^4.4.3",
     "fastestsmallesttextencoderdecoder": "^1.0.22"
   },
   "devDependencies": {

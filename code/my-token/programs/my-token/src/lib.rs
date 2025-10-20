@@ -6,10 +6,11 @@ use anchor_spl::{
         create_metadata_accounts_v3, CreateMetadataAccountsV3, Metadata,
     },
 };
-use mpl_token_metadata::types::DataV2;
+use anchor_spl::metadata::mpl_token_metadata;
+use anchor_spl::metadata::mpl_token_metadata::types::DataV2;
 use std::convert::Into;
 
-declare_id!("CpSi4sN2zeeEZpdfkGf1NjYCrV41oodwpFhazZZee88E");
+declare_id!("DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU");
 
 #[error_code]
 pub enum ErrorCode {
@@ -41,6 +42,7 @@ pub struct CreateMultisig<'info> {
         payer = buyer,
         mint::decimals = 0,
         mint::authority = multisig_account.key(),
+        mint::token_program = token_program,
     )]
     pub mint: Account<'info, Mint>,
     
@@ -66,6 +68,7 @@ pub struct CreateMultisig<'info> {
 #[account]
 pub struct Transaction {
     pub buyer: Pubkey,
+    pub multisig: Pubkey,
     pub signers: Vec<Pubkey>,
     pub approver: Vec<Pubkey>,
     pub exec: bool,
@@ -100,9 +103,11 @@ pub struct ExecuteTransaction<'info> {
         seeds = [
             b"create-transaction",
             buyer.key().as_ref(),
-            multisig_account.key().as_ref(),
+            multisig.key().as_ref(),
         ],
-        bump
+        bump,
+        has_one = buyer,
+        has_one = multisig,
     )]
     pub transaction: Account<'info, Transaction>,
 
@@ -116,12 +121,12 @@ pub struct ExecuteTransaction<'info> {
 		],
 		bump
     )]
-    multisig_account: Account<'info, MultisigAccount>,
+    pub multisig: Account<'info, MultisigAccount>,
 
     // Minting Account
     #[account(mut,
-        mint::authority = multisig_account,
-)]
+        mint::authority = multisig,
+    )]
     pub mint: Account<'info, Mint>,
 
     // Token Holder
@@ -158,18 +163,23 @@ pub struct ExecuteTransaction<'info> {
 
 #[derive(Accounts)]
 pub struct ApproveTransaction<'info> {
-    pub multisig_account: Account<'info, MultisigAccount>,
     #[account(mut, 
         seeds = [
             b"create-transaction",
             buyer.key().as_ref(),
-            multisig_account.key().as_ref(),
+            multisig.key().as_ref(),
         ],
-        bump
+        bump,
+        has_one = buyer,
+        has_one = multisig,
     )]
     pub transaction: Account<'info, Transaction>,
+    
+    pub multisig: Account<'info, MultisigAccount>,
+    
     #[account(signer)]
     pub approver: Signer<'info>,
+    
     #[account()]
     pub buyer: Signer<'info>,
 }
@@ -219,6 +229,7 @@ pub mod solana_nft_anchor {
         ) -> Result<()> {
             let transaction = &mut ctx.accounts.transaction;
             transaction.buyer = buyer;
+            transaction.multisig = ctx.accounts.multisig_account.key();
             transaction.signers = ctx.accounts.multisig_account.signers.clone();
             transaction.approver = Vec::new();
             transaction.exec = false;
@@ -240,12 +251,12 @@ pub mod solana_nft_anchor {
                 MintTo {
                     mint: ctx.accounts.mint.to_account_info(),
                     to: ctx.accounts.associated_token_account.to_account_info(),
-                    authority: ctx.accounts.multisig_account.to_account_info(),
+                    authority: ctx.accounts.multisig.to_account_info(),
                 },
                 &[&[
                     b"multisig",
                     ctx.accounts.mint.key().as_ref(),
-                    &[ctx.bumps.multisig_account]
+                    &[ctx.bumps.multisig]
                 ]]    
             ), 1)?;
             // Add Metadata
@@ -263,8 +274,8 @@ pub mod solana_nft_anchor {
                 CreateMetadataAccountsV3 {
                     metadata: ctx.accounts.metadata_account.to_account_info(),
                     mint: ctx.accounts.mint.to_account_info(),
-                    mint_authority: ctx.accounts.multisig_account.to_account_info(),
-                    update_authority: ctx.accounts.multisig_account.to_account_info(),
+                    mint_authority: ctx.accounts.multisig.to_account_info(),
+                    update_authority: ctx.accounts.multisig.to_account_info(),
                     payer: ctx.accounts.buyer.to_account_info(),
                     system_program: ctx.accounts.system_program.to_account_info(),
                     rent: ctx.accounts.rent.to_account_info(),
@@ -272,7 +283,7 @@ pub mod solana_nft_anchor {
                 &[&[
                     b"multisig",
                     ctx.accounts.mint.key().as_ref(),
-                    &[ctx.bumps.multisig_account]
+                    &[ctx.bumps.multisig]
                 ]]    
             ), data_v2, false, true, None)?;
             Ok(())

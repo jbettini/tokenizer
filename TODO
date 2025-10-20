@@ -1,7 +1,10 @@
-mettre a jour deploy pour qu'il fonctionne direct
-Prouver le ownership
-
-Petite description du contenue du repo dans le readme
-
-Expliquer dans le dossier code comment un NFT fonctionne 
-
+[ ] Fix les erreur de compil
+[ ] Check si tout est store dans pinata
+[ ] Read me pour expliquer les choix 
+[ ] Manage token metadata
+    [ ] Name with 42
+    [ ] Artist jbettini
+    [ ] A title
+[ ] Check var and fun naming for code review
+[ ] Display public address and network use to mint the NFT
+[ ] Create multiple image for ipfs and on chqin storage

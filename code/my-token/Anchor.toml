@@ -6,17 +6,17 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-my_token = "DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU"
+my_token = "4q9zSqGHPwFquwgfMRMtsFWnFZYBzWbRFESXcAMyH4cE"
 
 [programs.localnet]
-my_token = "DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU"
+my_token = "4q9zSqGHPwFquwgfMRMtsFWnFZYBzWbRFESXcAMyH4cE"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
 cluster = "Devnet"
-wallet = "/tokenizer/code/wallet/keypair1.json"
+wallet = "/tokenizer/code/wallet/keypair2.json"
 
 [scripts]
 test = "npx jest"

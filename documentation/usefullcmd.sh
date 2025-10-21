@@ -6,7 +6,7 @@ anchor test --skip-build --skip-deploy
 
 solana program show |PROGRAM ID|
 solana program extend |PROGRAM ID| 100000
-solana config set --keypair ../wallet/keypair1.json
+solana config set --keypair ../wallet/keypair2.json
 
 yarn add --dev ts-mocha typescript @types/node @types/mocha && yarn add @solana/spl-token @metaplex-foundation/umi@^0.8.2 @solana/web3.js@^1.91.6 fastestsmallesttextencoderdecoder@^1.0.22
 
@@ -21,4 +21,4 @@ npm install @coral-xyz/anchor
 yarn upgrade @coral-xyz/anchor@0.30.0
 
 export ANCHOR_PROVIDER_URL="https://api.devnet.solana.com"
-export ANCHOR_WALLET="/tokenizer/code/wallet/keypair1.json"
+export ANCHOR_WALLET="/tokenizer/code/wallet/keypair2.json"

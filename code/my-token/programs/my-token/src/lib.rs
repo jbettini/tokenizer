@@ -10,7 +10,7 @@ use anchor_spl::metadata::mpl_token_metadata;
 use anchor_spl::metadata::mpl_token_metadata::types::DataV2;
 use std::convert::Into;
 
-declare_id!("DZY3hVymQ5yzTeEJzuzTqrMqdH2iSWT1XBsLtnzBi2BU");
+declare_id!("4q9zSqGHPwFquwgfMRMtsFWnFZYBzWbRFESXcAMyH4cE");
 
 #[error_code]
 pub enum ErrorCode {

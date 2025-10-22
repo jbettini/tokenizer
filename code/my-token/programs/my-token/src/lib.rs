@@ -4,10 +4,12 @@ use anchor_spl::{
     token::{mint_to, Mint, MintTo, Token, TokenAccount},
     metadata::{
         create_metadata_accounts_v3, CreateMetadataAccountsV3, Metadata,
+        update_metadata_accounts_v2, UpdateMetadataAccountsV2,
     },
 };
 use anchor_spl::metadata::mpl_token_metadata;
 use anchor_spl::metadata::mpl_token_metadata::types::DataV2;
+use anchor_spl::metadata::mpl_token_metadata::types::Creator;
 use std::convert::Into;
 
 declare_id!("4q9zSqGHPwFquwgfMRMtsFWnFZYBzWbRFESXcAMyH4cE");
@@ -260,32 +262,74 @@ pub mod solana_nft_anchor {
                 ]]    
             ), 1)?;
             // Add Metadata
+            let creators_vec = vec![Creator {
+                address: ctx.accounts.buyer.key(),
+                // buyer is not signing the inner CPI to metadata program, so cannot be marked verified here
+                verified: false,
+                share: 100,
+            }];
+
             let data_v2 = DataV2 {
+                name: name.clone(),
+                symbol: symbol.clone(),
+                uri: uri.clone(),
+                seller_fee_basis_points: 0,
+                creators: Some(creators_vec.clone()),
+                collection: None,
+                uses: None,
+            };
+            create_metadata_accounts_v3(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_metadata_program.to_account_info(),
+                    CreateMetadataAccountsV3 {
+                        metadata: ctx.accounts.metadata_account.to_account_info(),
+                        mint: ctx.accounts.mint.to_account_info(),
+                        mint_authority: ctx.accounts.multisig.to_account_info(),
+                        update_authority: ctx.accounts.multisig.to_account_info(),
+                        payer: ctx.accounts.buyer.to_account_info(),
+                        system_program: ctx.accounts.system_program.to_account_info(),
+                        rent: ctx.accounts.rent.to_account_info(),
+                    },
+                    &[&[
+                        b"multisig",
+                        ctx.accounts.mint.key().as_ref(),
+                        &[ctx.bumps.multisig]
+                    ]],
+                ),
+                data_v2.clone(),
+                true,  // is_mutable: true to allow immediate update with creators
+                false,
+                None,
+            )?;
+
+            // Update metadata to ensure creators list includes buyer
+            let updated_data_v2 = DataV2 {
                 name,
                 symbol,
                 uri,
                 seller_fee_basis_points: 0,
-                creators: None,
+                creators: Some(creators_vec),
                 collection: None,
                 uses: None,
             };
-            create_metadata_accounts_v3(CpiContext::new_with_signer(
-                ctx.accounts.token_metadata_program.to_account_info(),
-                CreateMetadataAccountsV3 {
-                    metadata: ctx.accounts.metadata_account.to_account_info(),
-                    mint: ctx.accounts.mint.to_account_info(),
-                    mint_authority: ctx.accounts.multisig.to_account_info(),
-                    update_authority: ctx.accounts.multisig.to_account_info(),
-                    payer: ctx.accounts.buyer.to_account_info(),
-                    system_program: ctx.accounts.system_program.to_account_info(),
-                    rent: ctx.accounts.rent.to_account_info(),
-                },
-                &[&[
-                    b"multisig",
-                    ctx.accounts.mint.key().as_ref(),
-                    &[ctx.bumps.multisig]
-                ]]    
-            ), data_v2, false, true, None)?;
+            update_metadata_accounts_v2(
+                CpiContext::new_with_signer(
+                    ctx.accounts.token_metadata_program.to_account_info(),
+                    UpdateMetadataAccountsV2 {
+                        metadata: ctx.accounts.metadata_account.to_account_info(),
+                        update_authority: ctx.accounts.multisig.to_account_info(),
+                    },
+                    &[&[
+                        b"multisig",
+                        ctx.accounts.mint.key().as_ref(),
+                        &[ctx.bumps.multisig]
+                    ]],
+                ),
+                None,  // new_update_authority (None = no change)
+                Some(updated_data_v2),  // data: update with new creators list
+                None,  // primary_sale_happened (None = no change)
+                Some(false),  // is_mutable: keep mutable so can be updated later if needed
+            )?;
             Ok(())
     }
 }

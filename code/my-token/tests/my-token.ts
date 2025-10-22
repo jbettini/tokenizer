@@ -1,6 +1,7 @@
 // @ts-nocheck
 import * as anchor from "@coral-xyz/anchor";
 import { Program } from "@coral-xyz/anchor";
+// avoid importing mpl-token-metadata at runtime in tests (can cause bundling/runtime issues)
 import { getAssociatedTokenAddress, TOKEN_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
 // Metaplex Token Metadata Program ID
@@ -21,6 +22,9 @@ describe("solana-nft-anchor", () => {
 	it("mints nft!", async () => {
 		const multisigKeys = new Array(3).fill(null).map(() => anchor.web3.Keypair.generate());
 		const signerPubkeys = multisigKeys.map(key => key.publicKey);
+		
+		console.log('\n🎨 NFT Mint Address:', mint.publicKey.toBase58());
+		console.log('🔗 View on Solana Explorer:', `https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet\n`);
 
 		// create multisig
 		const [multisigAccount] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -106,6 +110,9 @@ describe("solana-nft-anchor", () => {
 			TOKEN_METADATA_PROGRAM_ID,
 		);
 		
+		console.log('📄 Metadata Account:', metadataAddress.toBase58());
+		console.log('🔗 View Metadata:', `https://explorer.solana.com/address/${metadataAddress.toBase58()}?cluster=devnet\n`);
+		
 		const executeTransaction = async () => {
 			tx(`Execute Transaction`, await program.methods
 				.execute(metadata.name, metadata.symbol, metadata.uri)
@@ -127,5 +134,17 @@ describe("solana-nft-anchor", () => {
 			await approveTransaction(owner);
 		}
 		await executeTransaction();
+
+		// Verify metadata creators by searching the buyer pubkey bytes inside the raw metadata account data
+		const rawAcct = await provider.connection.getAccountInfo(metadataAddress);
+		if (!rawAcct) throw new Error('Metadata account not found on chain');
+		const buyerBytes = buyer.publicKey.toBuffer();
+		const found = rawAcct.data.indexOf(Buffer.from(buyerBytes)) !== -1;
+		console.log('Buyer pubkey present in metadata raw data:', found);
+		if (!found) {
+			// dump first 200 bytes for debugging
+			console.log('metadata raw (first 200 bytes):', rawAcct.data.slice(0, 200));
+			throw new Error('Buyer pubkey not found in metadata account data');
+		}
 	}, 15000);
 });

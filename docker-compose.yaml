@@ -2,3 +2,6 @@ services:
   tokenizer:
     build: .
     volumes: [.:/tokenizer]
+    ports:
+      - "3000:3000"
+      - "8545:8545"

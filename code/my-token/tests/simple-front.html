@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Mint NFT</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: Arial, sans-serif;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border: none;
+            padding: 20px 60px;
+            font-size: 24px;
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+            transition: all 0.3s ease;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+        }
+        
+        button:active {
+            transform: translateY(-1px);
+        }
+        
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        #status {
+            margin-top: 20px;
+            color: white;
+            font-size: 18px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="mint()" id="btn">MINT</button>
+    <p id="status"></p>
+    
+    <script>
+        async function mint() {
+            const btn = document.getElementById('btn');
+            const status = document.getElementById('status');
+            btn.disabled = true;
+            status.textContent = 'Minting...';
+            
+            try {
+                const res = await fetch('http://localhost:8545/mint', { method: 'POST' });
+                const data = await res.json();
+                
+                if (data.success) {
+                    status.textContent = 'Success!';
+                    
+                    // Notifier le serveur qu'on va rediriger
+                    fetch('http://localhost:8545/shutdown', { method: 'POST' });
+                    
+                    // Rediriger immédiatement
+                    window.location.href = data.explorerUrl;
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (err) {
+                status.textContent = 'Error: ' + err.message;
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

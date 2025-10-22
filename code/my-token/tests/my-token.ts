@@ -23,8 +23,8 @@ describe("solana-nft-anchor", () => {
 		const multisigKeys = new Array(3).fill(null).map(() => anchor.web3.Keypair.generate());
 		const signerPubkeys = multisigKeys.map(key => key.publicKey);
 		
-		console.log('\n🎨 NFT Mint Address:', mint.publicKey.toBase58());
-		console.log('🔗 View on Solana Explorer:', `https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet\n`);
+		console.log('\nNFT Mint Address:', mint.publicKey.toBase58());
+		console.log('View on Solana Explorer:', `https://explorer.solana.com/address/${mint.publicKey.toBase58()}?cluster=devnet\n`);
 
 		// create multisig
 		const [multisigAccount] = anchor.web3.PublicKey.findProgramAddressSync(
@@ -52,7 +52,7 @@ describe("solana-nft-anchor", () => {
 		const metadata = {
 			name: "MonkeyJbettini42",
 			symbol: "MKA",
-			uri: "https://raw.githubusercontent.com/jbettini/Tokenizer/main/code/nft_data/1.json",
+			uri: "https://gateway.pinata.cloud/ipfs/bafkreiaete7j6dkezy6m5ehdfwacfkffgusun6qpxsskzciflhehpzbxfu",
 		};
 		
 		// Calculate transaction PDA
@@ -110,8 +110,8 @@ describe("solana-nft-anchor", () => {
 			TOKEN_METADATA_PROGRAM_ID,
 		);
 		
-		console.log('📄 Metadata Account:', metadataAddress.toBase58());
-		console.log('🔗 View Metadata:', `https://explorer.solana.com/address/${metadataAddress.toBase58()}?cluster=devnet\n`);
+		console.log('Metadata Account:', metadataAddress.toBase58());
+		console.log('View Metadata:', `https://explorer.solana.com/address/${metadataAddress.toBase58()}?cluster=devnet\n`);
 		
 		const executeTransaction = async () => {
 			tx(`Execute Transaction`, await program.methods

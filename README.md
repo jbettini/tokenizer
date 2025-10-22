@@ -14,8 +14,7 @@ Tokenizer est un projet ou l'on doit cree un token sur une blockchain au choix. 
 ## Features
 - Création de comptes multisig.
 - Validation de transactions par multiples signatures.
-- Minting de NFT avec métadonnées dynamiques.
-- Sécurisation des opérations via des contrats intelligents.
+- Minting de NFT.
 
 ## Dependance :
     - Curl

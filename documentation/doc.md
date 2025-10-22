@@ -22,7 +22,7 @@ Les fonction seront presenté sous leur format TS, leur format dans le smart con
 **NFT-Usage**
 
 La creation d'un Nft (Non-fungible Token) peut etre vue comme l'achat d'une oeuvre d'art numerique, mais en realite un NFT est un type de token crypto, que ce soit un élément de contenu numérique comme une œuvre d'art, une musique, ou tout autre actif numérique, l'acqueur possede une preuve indiscutable de propriété.
-Par leur identité unique cela peut etre utiliser de diverse facon tel que un passdroit sur des projet ou des application de type smart contract, ou peuvent etre uniquement a charactere artistique.
+Par leur identité unique cela peut etre utiliser de diverse facon tel que un passdroit sur des projet ou des application de type smart contract, ou peuvent etre uniquement a caractere artistique.
 En l'occurence ici notre token est purement artistique et permet de speculer sur une revente commercial.
 
 **Project**

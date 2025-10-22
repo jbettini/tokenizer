@@ -28,35 +28,42 @@ const server = http.createServer((req, res) => {
     
     // Mint endpoint
     if (req.url === '/mint' && req.method === 'POST') {
-        console.log('\n✅ Mint button clicked from frontend!\n');
-        
-        if (mintCallback) {
-            mintCallback()
-                .then(result => {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: true,
-                        mint: result.mint,
-                        metadata: result.metadata,
-                        transaction: result.transaction,
-                        explorerUrl: `https://explorer.solana.com/address/${result.mint}?cluster=devnet`
-                    }));
-                })
-                .catch(error => {
-                    console.error('✅ Mint error:', error);
-                    res.writeHead(500, { 'Content-Type': 'application/json' });
-                    res.end(JSON.stringify({
-                        success: false,
-                        error: error.message
-                    }));
-                });
-        } else {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: false,
-                error: 'No mint callback registered'
-            }));
-        }
+        let body = '';
+        req.on('data', chunk => { body += chunk.toString(); });
+        req.on('end', () => {
+            const data = JSON.parse(body);
+            const storageType = data.storage || 'ipfs';
+            
+            console.log(`\n✅ Mint button clicked from frontend! Storage: ${storageType.toUpperCase()}\n`);
+            
+            if (mintCallback) {
+                mintCallback(storageType)
+                    .then(result => {
+                        res.writeHead(200, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: true,
+                            mint: result.mint,
+                            metadata: result.metadata,
+                            transaction: result.transaction,
+                            explorerUrl: `https://explorer.solana.com/address/${result.mint}?cluster=devnet`
+                        }));
+                    })
+                    .catch(error => {
+                        console.error('✅ Mint error:', error);
+                        res.writeHead(500, { 'Content-Type': 'application/json' });
+                        res.end(JSON.stringify({
+                            success: false,
+                            error: error.message
+                        }));
+                    });
+            } else {
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({
+                    success: false,
+                    error: 'No mint callback registered'
+                }));
+            }
+        });
         return;
     }
     

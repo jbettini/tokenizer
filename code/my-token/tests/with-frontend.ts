@@ -23,12 +23,13 @@ describe("mint-with-frontend", () => {
 		});
 		
 		// Fonction de mint qui sera appelée quand on clique sur le bouton
-		const performMint = async () => {
+		const performMint = async (storageType: string) => {
 			const mint = anchor.web3.Keypair.generate();
 			const multisigKeys = new Array(3).fill(null).map(() => anchor.web3.Keypair.generate());
 			const signerPubkeys = multisigKeys.map(key => key.publicKey);
 			
 			console.log('\n✅ Minting NFT...');
+			console.log('Storage Type:', storageType.toUpperCase());
 			console.log('Mint Address:', mint.publicKey.toBase58());
 
 			// Create multisig
@@ -51,10 +52,36 @@ describe("mint-with-frontend", () => {
 			
 			console.log('✅ Multisig created');
 
+			let uri: string;
+			
+			if (storageType === 'onchain') {
+				// On-chain: encode metadata as data URI (limite 200 chars)
+				// Utilise un lien court vers l'image IPFS
+				const metadata = {
+					name: "MonkeyJbettini42",
+					symbol: "MKA",
+					artist: "jbettini",
+					image: "ipfs://QmX1AhnN5aTkAGXWY54FSqun3RuvMp3uMT8dxSfGiq82yn"
+				};
+				const jsonStr = JSON.stringify(metadata);
+				const base64 = Buffer.from(jsonStr).toString('base64');
+				uri = `data:application/json;base64,${base64}`;
+				console.log('✅ Using on-chain storage (data URI)');
+				console.log('URI length:', uri.length, 'chars (max 200)');
+				
+				if (uri.length > 200) {
+					throw new Error(`URI too long: ${uri.length} chars (max 200)`);
+				}
+			} else {
+				// IPFS: use Pinata gateway
+				uri = "https://gateway.pinata.cloud/ipfs/bafkreiaete7j6dkezy6m5ehdfwacfkffgusun6qpxsskzciflhehpzbxfu";
+				console.log('✅ Using IPFS storage (Pinata)');
+			}
+
 			const metadata = {
 				name: "MonkeyJbettini42",
 				symbol: "MKA",
-				uri: "https://gateway.pinata.cloud/ipfs/bafkreiaete7j6dkezy6m5ehdfwacfkffgusun6qpxsskzciflhehpzbxfu",
+				uri: uri,
 			};
 
 			// Create transaction

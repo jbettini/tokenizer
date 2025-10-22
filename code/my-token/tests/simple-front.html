@@ -16,6 +16,57 @@
             font-family: Arial, sans-serif;
         }
         
+        .container {
+            text-align: center;
+        }
+        
+        .storage-options {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+        }
+        
+        .storage-options h2 {
+            margin: 0 0 20px 0;
+            color: #333;
+            font-size: 22px;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .radio-option {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+        
+        .radio-option label {
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #333;
+        }
+        
+        .info-text {
+            font-size: 14px;
+            color: #666;
+            margin-top: 10px;
+        }
+        
         button {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
@@ -53,18 +104,44 @@
     </style>
 </head>
 <body>
-    <button onclick="mint()" id="btn">MINT</button>
-    <p id="status"></p>
+    <div class="container">
+        <div class="storage-options">
+            <h2>Choose Storage Type</h2>
+            <div class="radio-group">
+                <div class="radio-option">
+                    <input type="radio" id="ipfs" name="storage" value="ipfs" checked>
+                    <label for="ipfs">IPFS</label>
+                </div>
+                <div class="radio-option">
+                    <input type="radio" id="onchain" name="storage" value="onchain">
+                    <label for="onchain">On-Chain</label>
+                </div>
+            </div>
+            <div class="info-text">
+                <strong>IPFS:</strong> Decentralized storage via Pinata<br>
+                <strong>On-Chain:</strong> Data stored directly on Solana blockchain
+            </div>
+        </div>
+        
+        <button onclick="mint()" id="btn">MINT</button>
+        <p id="status"></p>
+    </div>
     
     <script>
         async function mint() {
             const btn = document.getElementById('btn');
             const status = document.getElementById('status');
+            const storageType = document.querySelector('input[name="storage"]:checked').value;
+            
             btn.disabled = true;
-            status.textContent = 'Minting...';
+            status.textContent = `Minting with ${storageType.toUpperCase()} storage...`;
             
             try {
-                const res = await fetch('http://localhost:8545/mint', { method: 'POST' });
+                const res = await fetch('http://localhost:8545/mint', { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ storage: storageType })
+                });
                 const data = await res.json();
                 
                 if (data.success) {
